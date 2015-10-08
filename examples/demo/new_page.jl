@@ -59,8 +59,11 @@ function main(window)
     submitted_ratings = foldl(userratingvec, sampleon(btn, ratings) ) do ratingvec, new_vec
         ratingvec=sparse(movieindices,int(ones(n)),new_vec)
         #println(movieindices, new_vec, ratingvec)
+        println("Hit Button")
         ratingvec
     end
+
+    println(submitted_ratings)
 
     #ratingvec = zeros(size(movie_dataset))
 
