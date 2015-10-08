@@ -47,7 +47,7 @@ function main(window)
     nummovies = size(movie_dataset)[1]
     movielist = movie_dataset[floor(rand(n)*nummovies), :]
     movieindices = int(movielist[:, 1])
-    ratingvec = spzeros(nummovies, 1)
+    userratingvec = spzeros(nummovies, 1)
 
     init_ratings = zeros(Int, n)
     input = Input((0, 0))
@@ -56,9 +56,10 @@ function main(window)
         state
     end
 
-    submitted_ratings = foldl(ratingvec, sampleon(btn, ratings) ) do vector, movieindices
-        vector[movieindices] = int(value(ratings))
-        vector
+    submitted_ratings = foldl(userratingvec, sampleon(btn, ratings) ) do ratingvec, new_vec
+        ratingvec=sparse(movieindices,int(ones(n)),new_vec)
+        #println(movieindices, new_vec, ratingvec)
+        ratingvec
     end
 
     #ratingvec = zeros(size(movie_dataset))
