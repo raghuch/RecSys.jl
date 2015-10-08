@@ -8,9 +8,6 @@ function show_movie_input(meta, m, updates, idx)
        size(120px, 180px) |> vbox |> packacross(center)
     desc = vbox( fontsize(1em, m), getfield(meta, m, "Genre")    )
 
-    #rating_widget = radiogroup([radio("0", "0"),radio("1", "1"), radio("2", "2"),radio("3", "3"),radio("4", "4"),radio("5", "5")];
-    #                          name="Your Rating (0 for \"didn't watch\" )"
-    #                         )
 
     rating_slider = slider(0:5; name="rating-$idx", value=0, editable=true, pin=true, disabled=false, secondaryprogress=0)
     rating_widget = addinterpreter(r -> (idx, r), rating_slider) >>> updates
@@ -26,21 +23,6 @@ function show_movie_input(meta, m, updates, idx)
 
 end
 
-#=
-function updaterating!(user_rating)
-end
-
-function ratingwidget(movietile, movielist)
-
-    user_rating = Input(0)
-    rating_widget = subscribe(slider(0:5; name="Your rating", value=0, editable=true, pin=true, disabled=false, secondaryprogress=0),
-                              user_rating )
-    user_ratingᵗ = lift(user_rating) do
-    end
-
-    vbox(movietile, vskip(1em), rating_widget)
-end
-=#
 
 function main(window)
     push!(window.assets, "widgets")
@@ -60,18 +42,25 @@ function main(window)
 
     vlist0 = vbox(title(1, "To get recommendations, rate some movies (0 for didn't watch and 1-5 for ratings)"), hskip(3em), width(20em, username))
 
-### GET A LIST OF MOVIES, num_movies IS THE NUMBER OF MOVIES YOU WANT ###
-## nrows is the number of rows in the display, and ncols is the number of columns per row.
 
-    n = 12
-    movielist = movie_dataset[floor(rand(n)*1600), :]
+    n = 15
+    nummovies = size(movie_dataset)[1]
+    movielist = movie_dataset[floor(rand(n)*nummovies), :]
+    movieindices = int(movielist[:, 1])
+    ratingvec = spzeros(nummovies, 1)
+
     init_ratings = zeros(Int, n)
     input = Input((0, 0))
     ratings = foldl(init_ratings, input) do state, update
         state[update[1]] = update[2]
         state
     end
-    submitted_ratings = sampleon(btn, ratings)
+
+    submitted_ratings = foldl(ratingvec, sampleon(btn, ratings) ) do vector, movieindices
+        vector[movieindices] = int(value(ratings))
+        vector
+    end
+
     #ratingvec = zeros(size(movie_dataset))
 
     list = hbox([show_movie_input(movie_meta, m, input, idx) for (idx, m) in enumerate(movielist[:,2])]) |> wrap
